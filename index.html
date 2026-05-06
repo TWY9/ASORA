@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASORA – Plataforma digital para asesorías escolares</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --purple-deep:  #1a0a2e;
+      --purple-mid:   #2d1b69;
+      --purple-core:  #5b2d8e;
+      --purple-bright:#7c3aed;
+      --purple-glow:  #a855f7;
+      --purple-light: #c084fc;
+      --purple-pale:  #e9d5ff;
+      --accent-cyan:  #06b6d4;
+      --accent-white: #f8f4ff;
+      --text-body:    #d1c4e9;
+      --text-muted:   #9575cd;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--purple-deep);
+      color: var(--accent-white);
+      overflow-x: hidden;
+    }
+
+    /* ── CIRCUIT CANVAS ── */
+    #circuit-canvas {
+      position: fixed; inset: 0;
+      z-index: 0; pointer-events: none;
+      opacity: .18;
+    }
+
+    /* ── PARTICLES ── */
+    .particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .particle {
+      position: absolute; border-radius: 50%;
+      background: var(--purple-glow);
+      animation: floatUp linear infinite;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: .6; }
+      90%  { opacity: .3; }
+      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(26, 10, 46, .85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(168, 85, 247, .25);
+    }
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem; font-weight: 900;
+      letter-spacing: .15em;
+      background: linear-gradient(90deg, var(--purple-glow), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; gap: 2rem; }
+    .nav-links a {
+      color: var(--text-body); text-decoration: none;
+      font-size: .9rem; font-weight: 500; letter-spacing: .05em;
+      transition: color .2s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; left: 0; bottom: -4px;
+      width: 0; height: 2px;
+      background: var(--purple-glow);
+      transition: width .3s;
+    }
+    .nav-links a:hover { color: var(--purple-light); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh; position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 2rem 4rem;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute; border-radius: 50%; filter: blur(90px);
+      animation: pulse 4s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    .glow-1 { width: 500px; height: 500px; background: rgba(124,58,237,.25); top: -100px; left: -150px; }
+    .glow-2 { width: 400px; height: 400px; background: rgba(6,182,212,.15); bottom: -80px; right: -100px; animation-delay: -2s; }
+    @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(124,58,237,.2); border: 1px solid rgba(168,85,247,.4);
+      border-radius: 99px; padding: .35rem 1.1rem;
+      font-size: .78rem; letter-spacing: .1em; color: var(--purple-light);
+      margin-bottom: 1.5rem;
+      animation: fadeDown .7s ease both;
+    }
+    .hero-badge span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-cyan); animation: blink 1.5s infinite; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+
+    .hero-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(5rem, 16vw, 10rem);
+      font-weight: 900; line-height: 1;
+      letter-spacing: .06em;
+      background: linear-gradient(135deg, #fff 0%, var(--purple-light) 40%, var(--purple-glow) 70%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      animation: fadeDown .9s .1s ease both;
+      filter: drop-shadow(0 0 40px rgba(168,85,247,.5));
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-weight: 300; color: var(--purple-pale);
+      font-style: italic; margin-top: .5rem;
+      animation: fadeDown 1s .2s ease both;
+    }
+
+    .hero-tagline {
+      margin-top: 1.5rem;
+      font-size: clamp(.95rem, 2vw, 1.15rem);
+      color: var(--text-body); font-weight: 400;
+      max-width: 580px;
+      animation: fadeDown 1s .35s ease both;
+    }
+
+    .hero-stats {
+      display: flex; gap: 3rem; margin-top: 3rem;
+      animation: fadeDown 1s .5s ease both;
+    }
+    .stat { text-align: center; }
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 2.4rem; font-weight: 900;
+      background: linear-gradient(90deg, var(--purple-glow), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: .8rem; color: var(--text-muted); margin-top: .15rem; letter-spacing: .08em; }
+
+    .hero-cta {
+      margin-top: 2.5rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeDown 1s .65s ease both;
+    }
+    .btn-primary {
+      padding: .85rem 2.2rem; border-radius: 8px;
+      background: linear-gradient(135deg, var(--purple-bright), var(--purple-core));
+      color: #fff; font-family: 'Outfit', sans-serif;
+      font-size: .95rem; font-weight: 600; letter-spacing: .06em;
+      border: none; cursor: pointer; text-decoration: none;
+      box-shadow: 0 0 30px rgba(124,58,237,.5);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(124,58,237,.8); }
+    .btn-outline {
+      padding: .85rem 2.2rem; border-radius: 8px;
+      background: transparent;
+      border: 1px solid rgba(168,85,247,.5);
+      color: var(--purple-light); font-family: 'Outfit', sans-serif;
+      font-size: .95rem; font-weight: 600; letter-spacing: .06em;
+      cursor: pointer; text-decoration: none;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .btn-outline:hover { background: rgba(168,85,247,.1); border-color: var(--purple-glow); color: #fff; }
+
+    /* ── SCROLL INDICATOR ── */
+    .scroll-hint {
+      position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: .5rem;
+      color: var(--text-muted); font-size: .75rem; letter-spacing: .1em;
+      animation: fadeDown 1s 1s ease both;
+    }
+    .scroll-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--purple-glow), transparent); animation: scrollLine 1.5s ease-in-out infinite; }
+    @keyframes scrollLine { 0%,100% { opacity: .3; transform: scaleY(.5); } 50% { opacity: 1; transform: scaleY(1); } }
+
+    /* ── SECTIONS ── */
+    section { position: relative; z-index: 1; padding: 6rem 2rem; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    .section-label {
+      font-size: .75rem; letter-spacing: .2em; color: var(--accent-cyan);
+      font-weight: 600; margin-bottom: .6rem;
+      text-transform: uppercase;
+    }
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 4vw, 2.5rem);
+      font-weight: 700; line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    .section-title span {
+      background: linear-gradient(90deg, var(--purple-glow), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section-text { color: var(--text-body); font-size: 1.05rem; line-height: 1.75; max-width: 680px; }
+
+    /* divider */
+    .divider { width: 60px; height: 3px; background: linear-gradient(90deg, var(--purple-glow), var(--accent-cyan)); border-radius: 2px; margin: 1.2rem 0 2rem; }
+
+    /* ── PROBLEMA ── */
+    #problema { background: linear-gradient(180deg, var(--purple-deep) 0%, rgba(45,27,105,.3) 100%); }
+    .problema-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+    .stat-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .stat-card {
+      background: rgba(124,58,237,.12);
+      border: 1px solid rgba(168,85,247,.2);
+      border-radius: 16px; padding: 1.5rem;
+      text-align: center;
+      transition: transform .3s, border-color .3s;
+    }
+    .stat-card:hover { transform: translateY(-4px); border-color: var(--purple-glow); }
+    .stat-card-num {
+      font-family: 'Orbitron', monospace; font-size: 2.8rem; font-weight: 900;
+      background: linear-gradient(90deg, var(--purple-glow), var(--accent-cyan));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-card-label { font-size: .85rem; color: var(--text-body); margin-top: .4rem; }
+    .stat-card-sub { font-size: .75rem; color: var(--text-muted); margin-top: .2rem; }
+
+    /* ── OBJETIVOS ── */
+    #objetivos { background: rgba(45,27,105,.15); }
+    .obj-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 1.2rem; margin-top: 2.5rem; }
+    .obj-card {
+      background: rgba(124,58,237,.08);
+      border: 1px solid rgba(168,85,247,.18);
+      border-radius: 14px; padding: 1.5rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+      transition: transform .3s, background .3s, border-color .3s;
+    }
+    .obj-card:hover { transform: translateY(-4px); background: rgba(124,58,237,.18); border-color: var(--purple-glow); }
+    .obj-num {
+      font-family: 'Orbitron', monospace; font-size: 1.6rem; font-weight: 900;
+      color: var(--purple-glow); line-height: 1; flex-shrink: 0;
+    }
+    .obj-text { font-size: .95rem; color: var(--text-body); line-height: 1.6; }
+    .obj-text strong { color: var(--accent-white); }
+
+    /* ── HIPÓTESIS ── */
+    #hipotesis {
+      background: linear-gradient(135deg, rgba(45,27,105,.3) 0%, rgba(6,182,212,.05) 100%);
+    }
+    .hipotesis-box {
+      border: 1px solid rgba(168,85,247,.35);
+      border-radius: 20px; padding: 3rem;
+      background: rgba(124,58,237,.1);
+      backdrop-filter: blur(10px);
+      position: relative; overflow: hidden;
+    }
+    .hipotesis-box::before {
+      content: '"'; position: absolute; top: -1rem; left: 1.5rem;
+      font-family: 'Orbitron', monospace; font-size: 10rem; font-weight: 900;
+      color: rgba(168,85,247,.08); line-height: 1; pointer-events: none;
+    }
+    .hipotesis-quote { font-size: 1.2rem; line-height: 1.8; color: var(--purple-pale); font-style: italic; margin-bottom: 2rem; }
+    .hipotesis-results { display: flex; gap: 2rem; flex-wrap: wrap; }
+    .result-pill {
+      background: rgba(124,58,237,.25); border: 1px solid rgba(168,85,247,.4);
+      border-radius: 99px; padding: .5rem 1.4rem;
+      font-family: 'Orbitron', monospace; font-size: .85rem; font-weight: 700;
+      color: var(--purple-light);
+    }
+
+    /* ── MÉTODO ── */
+    #metodo { background: rgba(26,10,46,.8); }
+    .metodo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-top: 2.5rem; }
+    .metodo-card {
+      background: rgba(124,58,237,.08);
+      border: 1px solid rgba(168,85,247,.18);
+      border-radius: 16px; padding: 2rem;
+      transition: transform .3s, border-color .3s;
+    }
+    .metodo-card:hover { transform: translateY(-5px); border-color: var(--accent-cyan); }
+    .metodo-icon { font-size: 2.2rem; margin-bottom: 1rem; }
+    .metodo-card h3 { font-family: 'Orbitron', monospace; font-size: .95rem; color: var(--accent-cyan); margin-bottom: .8rem; letter-spacing: .08em; }
+    .metodo-card p { font-size: .9rem; color: var(--text-body); line-height: 1.65; }
+    .tech-tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+    .tech-tag {
+      background: rgba(6,182,212,.15); border: 1px solid rgba(6,182,212,.3);
+      border-radius: 6px; padding: .25rem .65rem;
+      font-size: .75rem; color: var(--accent-cyan); font-weight: 600;
+    }
+
+    /* ── CRONOGRAMA ── */
+    #cronograma { background: rgba(45,27,105,.2); }
+    .timeline { margin-top: 2.5rem; position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 2px; background: linear-gradient(to bottom, var(--purple-glow), var(--accent-cyan), transparent);
+    }
+    .tl-item {
+      position: relative; padding-left: 2rem; margin-bottom: 2rem;
+      opacity: 0; transform: translateX(-20px);
+      transition: opacity .5s, transform .5s;
+    }
+    .tl-item.visible { opacity: 1; transform: translateX(0); }
+    .tl-dot {
+      position: absolute; left: -2.45rem; top: .35rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--purple-glow); border: 2px solid var(--purple-deep);
+      box-shadow: 0 0 12px var(--purple-glow);
+    }
+    .tl-weeks {
+      font-family: 'Orbitron', monospace; font-size: .78rem;
+      color: var(--accent-cyan); letter-spacing: .1em; margin-bottom: .3rem;
+    }
+    .tl-title { font-size: 1rem; font-weight: 600; color: var(--accent-white); margin-bottom: .2rem; }
+    .tl-desc { font-size: .88rem; color: var(--text-body); }
+
+    /* ── ENTREGABLES ── */
+    #entregables { background: rgba(26,10,46,.9); }
+    .entregables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.2rem; margin-top: 2.5rem; }
+    .entregable-card {
+      background: rgba(124,58,237,.1);
+      border: 1px solid rgba(168,85,247,.2);
+      border-radius: 14px; padding: 1.8rem 1.4rem;
+      text-align: center;
+      transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .entregable-card:hover { transform: translateY(-5px); box-shadow: 0 0 30px rgba(124,58,237,.3); border-color: var(--purple-glow); }
+    .entregable-icon { font-size: 2.5rem; margin-bottom: .8rem; }
+    .entregable-title { font-size: .9rem; font-weight: 600; color: var(--accent-white); line-height: 1.4; }
+
+    /* ── MARCO TEÓRICO ── */
+    #marco { background: linear-gradient(180deg, rgba(45,27,105,.2) 0%, var(--purple-deep) 100%); }
+    .marco-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    .teoria-list { display: flex; flex-direction: column; gap: .8rem; }
+    .teoria-item {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: rgba(124,58,237,.07);
+      border: 1px solid rgba(168,85,247,.15);
+      border-radius: 10px; padding: 1rem 1.2rem;
+      transition: border-color .3s;
+    }
+    .teoria-item:hover { border-color: var(--purple-glow); }
+    .teoria-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple-glow); flex-shrink: 0; margin-top: .35rem; }
+    .teoria-author { font-size: .8rem; color: var(--accent-cyan); font-weight: 600; margin-bottom: .1rem; }
+    .teoria-name { font-size: .88rem; color: var(--text-body); }
+
+    /* ── EQUIPO ── */
+    #equipo { background: rgba(45,27,105,.15); }
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; margin-top: 2.5rem; }
+    .team-card {
+      background: rgba(124,58,237,.1);
+      border: 1px solid rgba(168,85,247,.2);
+      border-radius: 20px; padding: 2.5rem 2rem;
+      text-align: center;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .team-card:hover { transform: translateY(-6px); box-shadow: 0 0 40px rgba(124,58,237,.3); }
+    .team-avatar {
+      width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Orbitron', monospace; font-size: 1.8rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--purple-bright), var(--accent-cyan));
+      box-shadow: 0 0 20px rgba(124,58,237,.5);
+    }
+    .team-name { font-size: 1rem; font-weight: 700; color: var(--accent-white); margin-bottom: .3rem; }
+    .team-id { font-family: 'Orbitron', monospace; font-size: .75rem; color: var(--accent-cyan); letter-spacing: .1em; margin-bottom: .5rem; }
+    .team-role { font-size: .85rem; color: var(--text-muted); }
+    .team-card.advisor { border-color: rgba(6,182,212,.35); }
+    .team-card.advisor .team-avatar { background: linear-gradient(135deg, var(--accent-cyan), var(--purple-bright)); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      background: rgba(26,10,46,.95);
+      border-top: 1px solid rgba(168,85,247,.2);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .footer-logo { font-family: 'Orbitron', monospace; font-size: 1.8rem; font-weight: 900; background: linear-gradient(90deg, var(--purple-glow), var(--accent-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: .4rem; }
+    .footer-sub { font-size: .85rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .footer-inst { font-size: .8rem; color: rgba(168,85,247,.5); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero-stats { gap: 1.5rem; }
+      .problema-grid, .marco-grid { grid-template-columns: 1fr; }
+      .metodo-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="circuit-canvas"></canvas>
+  <div class="particles" id="particles"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">ASORA</div>
+    <div class="nav-links">
+      <a href="#problema">Problema</a>
+      <a href="#objetivos">Objetivos</a>
+      <a href="#metodo">Método</a>
+      <a href="#cronograma">Cronograma</a>
+      <a href="#equipo">Equipo</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+
+    <div class="hero-badge"><span></span>Instituto Tecnológico de Morelia · 2026-1</div>
+    <h1 class="hero-title">ASORA</h1>
+    <p class="hero-subtitle">Plataforma digital para asesorías escolares</p>
+    <p class="hero-tagline">Impulsando el éxito académico a través de la tecnología. Conectamos a estudiantes con asesores de forma rápida, segura y eficiente.</p>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" data-target="50">0%</div>
+        <div class="stat-label">DESERCIÓN ACTUAL</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-target="45">0%</div>
+        <div class="stat-label">REPROBACIÓN MATERIAS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-target="30">0%</div>
+        <div class="stat-label">META REPROBACIÓN</div>
+      </div>
+    </div>
+
+    <div class="hero-cta">
+      <a href="#problema" class="btn-primary">Conocer el Proyecto</a>
+      <a href="#equipo" class="btn-outline">El Equipo</a>
+    </div>
+
+    <div class="scroll-hint">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- PROBLEMA -->
+  <section id="problema">
+    <div class="section-inner">
+      <div class="problema-grid">
+        <div class="reveal">
+          <div class="section-label">01 — Problemática</div>
+          <h2 class="section-title">Una brecha que<br/><span>frena el aprendizaje</span></h2>
+          <div class="divider"></div>
+          <p class="section-text">
+            En el entorno universitario, los estudiantes no cuentan con un sistema accesible para encontrar asesorías académicas cuando las necesitan. Se ven obligados a depender únicamente de recomendaciones informales o contactos personales, limitando gravemente su acceso a apoyo especializado.
+          </p>
+          <p class="section-text" style="margin-top:1rem;">
+            Esta carencia genera rezago, reprobación y, en los casos más severos, abandono definitivo de la carrera.
+          </p>
+          <div style="margin-top:1.5rem; padding:1.2rem 1.5rem; background:rgba(124,58,237,.12); border-left:3px solid var(--purple-glow); border-radius:0 10px 10px 0;">
+            <p style="font-size:.9rem; color:var(--purple-pale); font-style:italic;">
+              "La falta de un sistema digital que facilite la búsqueda y contacto con asesores limita el acceso a apoyo especializado, generando rezago que puede derivar en deserción."
+            </p>
+          </div>
+        </div>
+        <div class="stat-cards reveal" style="transition-delay:.15s">
+          <div class="stat-card">
+            <div class="stat-card-num">40–50%</div>
+            <div class="stat-card-label">Reprobación</div>
+            <div class="stat-card-sub">en materias de alta complejidad</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-num">~50%</div>
+            <div class="stat-card-label">Deserción</div>
+            <div class="stat-card-sub">deserción universitaria general</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-num">70%</div>
+            <div class="stat-card-label">Por dificultad</div>
+            <div class="stat-card-sub">de la deserción es académica</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-num">0</div>
+            <div class="stat-card-label">Plataformas</div>
+            <div class="stat-card-sub">digitales institucionales actuales</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OBJETIVOS -->
+  <section id="objetivos">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">02 — Objetivos</div>
+        <h2 class="section-title">¿Qué busca<br/><span>resolver ASORA?</span></h2>
+        <div class="divider"></div>
+        <p class="section-text"><strong style="color:#fff">Objetivo General:</strong> Diseñar e implementar una plataforma digital que facilite el acceso de los estudiantes a asesorías académicas mediante filtros especializados y opciones de contacto seguras y eficientes.</p>
+      </div>
+      <div class="obj-list">
+        <div class="obj-card reveal" style="transition-delay:.1s">
+          <div class="obj-num">01</div>
+          <div class="obj-text"><strong>Análisis de requerimientos</strong> mediante encuestas y entrevistas a estudiantes y docentes del ITM para identificar necesidades reales.</div>
+        </div>
+        <div class="obj-card reveal" style="transition-delay:.2s">
+          <div class="obj-num">02</div>
+          <div class="obj-text"><strong>Diseño de arquitectura</strong> con módulos de registro de asesores, búsqueda por materia y gestión de sesiones.</div>
+        </div>
+        <div class="obj-card reveal" style="transition-delay:.3s">
+          <div class="obj-num">03</div>
+          <div class="obj-text"><strong>Sistema de autenticación</strong> con perfiles de usuario (asesor / asesorado) y validación de credenciales institucionales.</div>
+        </div>
+        <div class="obj-card reveal" style="transition-delay:.4s">
+          <div class="obj-num">04</div>
+          <div class="obj-text"><strong>Módulo de filtrado</strong> por materia, disponibilidad horaria y valoraciones previas de los asesores.</div>
+        </div>
+        <div class="obj-card reveal" style="transition-delay:.5s">
+          <div class="obj-num">05</div>
+          <div class="obj-text"><strong>Evaluación con usuarios reales</strong> midiendo reducción en tiempo de búsqueda y satisfacción del usuario.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HIPÓTESIS -->
+  <section id="hipotesis">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">03 — Hipótesis</div>
+        <h2 class="section-title">El <span>impacto esperado</span></h2>
+        <div class="divider"></div>
+      </div>
+      <div class="hipotesis-box reveal" style="transition-delay:.15s">
+        <p class="hipotesis-quote">
+          La implementación de una plataforma virtual que centralice la oferta de asesorías académicas universitarias (ASORA) mejorará el acceso de los estudiantes a apoyo especializado, incrementando su rendimiento académico y contribuirá a reducir la deserción escolar.
+        </p>
+        <div class="hipotesis-results">
+          <div class="result-pill">Reprobación → 20–30%</div>
+          <div class="result-pill">Deserción → 25–35%</div>
+          <div class="result-pill">Inicio: ISC · ITM</div>
+          <div class="result-pill">Expansión: todas las carreras</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MÉTODO -->
+  <section id="metodo">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">04 — Metodología</div>
+        <h2 class="section-title">¿Cómo se <span>construye ASORA?</span></h2>
+        <div class="divider"></div>
+      </div>
+      <div class="metodo-grid">
+        <div class="metodo-card reveal" style="transition-delay:.1s">
+          <div class="metodo-icon">🔬</div>
+          <h3>Enfoque Científico</h3>
+          <p>Investigación aplicada con diseño exploratorio-descriptivo. Encuestas a estudiantes del ITM para identificar materias críticas y requerimientos del sistema.</p>
+        </div>
+        <div class="metodo-card reveal" style="transition-delay:.2s">
+          <div class="metodo-icon">⚙️</div>
+          <h3>Stack Tecnológico</h3>
+          <p>Desarrollo ágil con Scrum. Tecnologías modernas seleccionadas para garantizar escalabilidad y rendimiento.</p>
+          <div class="tech-tags">
+            <span class="tech-tag">React</span>
+            <span class="tech-tag">Flask</span>
+            <span class="tech-tag">PostgreSQL</span>
+            <span class="tech-tag">MySQL</span>
+            <span class="tech-tag">Scrum</span>
+          </div>
+        </div>
+        <div class="metodo-card reveal" style="transition-delay:.3s">
+          <div class="metodo-icon">🎓</div>
+          <h3>Modelo de Asesores</h3>
+          <p>Los asesores deben tener la materia aprobada y carta de recomendación del docente. Se incentivan con crédito complementario por horas impartidas. Abierto también a egresados y docentes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRONOGRAMA -->
+  <section id="cronograma">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">05 — Cronograma</div>
+        <h2 class="section-title">Ruta de <span>desarrollo</span></h2>
+        <div class="divider"></div>
+        <p class="section-text">Febrero – Agosto 2026</p>
+      </div>
+      <div class="timeline" style="margin-top:2.5rem; max-width:600px">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-weeks">SEMANAS 11 – 12</div>
+          <div class="tl-title">Formulación y Protocolo</div>
+          <div class="tl-desc">Definición de la problemática, antecedentes y redacción del protocolo de investigación.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-weeks">SEMANAS 13 – 14</div>
+          <div class="tl-title">Análisis y Arquitectura</div>
+          <div class="tl-desc">Levantamiento de requerimientos funcionales y no funcionales. Diseño de la arquitectura general del sistema.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-weeks">SEMANAS 15 – 17</div>
+          <div class="tl-title">Diseño e Implementación Base</div>
+          <div class="tl-desc">Prototipado de interfaz, diseño UX/UI e implementación del sistema de autenticación con credenciales institucionales.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-weeks">SEMANAS 18 – 23</div>
+          <div class="tl-title">Desarrollo de Módulos</div>
+          <div class="tl-desc">Desarrollo completo de búsqueda, filtrado por materia, disponibilidad horaria, valoraciones y gestión de sesiones.</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-weeks">SEMANAS 24 – 27</div>
+          <div class="tl-title">Pruebas y Entrega Final</div>
+          <div class="tl-desc">Pruebas de usabilidad con usuarios reales, métricas de impacto, redacción de artículo científico y entrega del informe final.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ENTREGABLES -->
+  <section id="entregables">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">06 — Entregables</div>
+        <h2 class="section-title">Productos <span>del proyecto</span></h2>
+        <div class="divider"></div>
+      </div>
+      <div class="entregables-grid">
+        <div class="entregable-card reveal" style="transition-delay:.1s">
+          <div class="entregable-icon">🖥️</div>
+          <div class="entregable-title">Plataforma web funcional ASORA</div>
+        </div>
+        <div class="entregable-card reveal" style="transition-delay:.2s">
+          <div class="entregable-icon">📖</div>
+          <div class="entregable-title">Manual de usuario para asesores y asesorados</div>
+        </div>
+        <div class="entregable-card reveal" style="transition-delay:.3s">
+          <div class="entregable-icon">📋</div>
+          <div class="entregable-title">Informe técnico de desarrollo y evaluación</div>
+        </div>
+        <div class="entregable-card reveal" style="transition-delay:.4s">
+          <div class="entregable-icon">📊</div>
+          <div class="entregable-title">Informe de pruebas de usabilidad y métricas</div>
+        </div>
+        <div class="entregable-card reveal" style="transition-delay:.5s">
+          <div class="entregable-icon">📄</div>
+          <div class="entregable-title">Artículo científico con resultados</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARCO TEÓRICO -->
+  <section id="marco">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">07 — Marco Teórico</div>
+        <h2 class="section-title">Fundamentos <span>teóricos</span></h2>
+        <div class="divider"></div>
+      </div>
+      <div class="marco-grid">
+        <div class="reveal" style="transition-delay:.1s">
+          <h3 style="font-size:.85rem; color:var(--accent-cyan); letter-spacing:.12em; margin-bottom:1rem; font-weight:600;">TEORÍAS Y MODELOS</h3>
+          <div class="teoria-list">
+            <div class="teoria-item"><div class="teoria-dot"></div><div><div class="teoria-author">Vygotsky (1978)</div><div class="teoria-name">Teoría del aprendizaje colaborativo</div></div></div>
+            <div class="teoria-item"><div class="teoria-dot"></div><div><div class="teoria-author">Tinto (1993)</div><div class="teoria-name">Modelo de integración académica y social</div></div></div>
+            <div class="teoria-item"><div class="teoria-dot"></div><div><div class="teoria-author">Wenger (1998)</div><div class="teoria-name">Teoría de comunidades de práctica</div></div></div>
+            <div class="teoria-item"><div class="teoria-dot"></div><div><div class="teoria-author">Salmon (2019)</div><div class="teoria-name">E-learning y educación digital</div></div></div>
+          </div>
+        </div>
+        <div class="reveal" style="transition-delay:.2s">
+          <h3 style="font-size:.85rem; color:var(--accent-cyan); letter-spacing:.12em; margin-bottom:1rem; font-weight:600;">ANTECEDENTES Y FUENTES</h3>
+          <div class="teoria-list">
+            <div class="teoria-item"><div class="teoria-dot" style="background:var(--accent-cyan)"></div><div><div class="teoria-author">Pascarella & Terenzini (2005)</div><div class="teoria-name">Impacto del acompañamiento en permanencia estudiantil</div></div></div>
+            <div class="teoria-item"><div class="teoria-dot" style="background:var(--accent-cyan)"></div><div><div class="teoria-author">García-Peñalvo (2015)</div><div class="teoria-name">Plataformas digitales en educación superior</div></div></div>
+            <div class="teoria-item"><div class="teoria-dot" style="background:var(--accent-cyan)"></div><div><div class="teoria-author">Hernández Sampieri et al. (2014)</div><div class="teoria-name">Metodología de la investigación</div></div></div>
+            <div class="teoria-item"><div class="teoria-dot" style="background:var(--accent-cyan)"></div><div><div class="teoria-author">Pressman (2010)</div><div class="teoria-name">Ingeniería del software: enfoque práctico</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EQUIPO -->
+  <section id="equipo">
+    <div class="section-inner">
+      <div class="reveal">
+        <div class="section-label">08 — Equipo</div>
+        <h2 class="section-title">Quiénes somos <span>detrás de ASORA</span></h2>
+        <div class="divider"></div>
+      </div>
+      <div class="team-grid">
+        <div class="team-card reveal" style="transition-delay:.1s">
+          <div class="team-avatar">N</div>
+          <div class="team-name">Natalia Guadalupe Corona Camarena</div>
+          <div class="team-id">23120532</div>
+          <div class="team-role">Ingeniería en Sistemas Computacionales</div>
+        </div>
+        <div class="team-card reveal" style="transition-delay:.2s">
+          <div class="team-avatar">M</div>
+          <div class="team-name">Marco Antonio Vázquez Ponce</div>
+          <div class="team-id">23120524</div>
+          <div class="team-role">Ingeniería en Sistemas Computacionales</div>
+        </div>
+        <div class="team-card advisor reveal" style="transition-delay:.3s">
+          <div class="team-avatar">G</div>
+          <div class="team-name">Gabriela Lúa Vargas</div>
+          <div class="team-id">ASESORA INTERNA</div>
+          <div class="team-role">Taller de Investigación I · 2026-1</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">ASORA</div>
+    <div class="footer-sub">Plataforma digital para asesorías escolares</div>
+    <div class="footer-inst">Instituto Tecnológico de Morelia · Subdirección Académica de Sistemas y Computación · Taller de Investigación I · 2026-1</div>
+  </footer>
+
+  <script>
+    // ── CIRCUIT BOARD CANVAS ──
+    const canvas = document.getElementById('circuit-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    function drawCircuits() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#7c3aed';
+      ctx.lineWidth = 1;
+      const cols = Math.ceil(canvas.width / 80);
+      const rows = Math.ceil(canvas.height / 80);
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = i * 80, y = j * 80;
+          if (Math.random() > .5) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + 40, y);
+            ctx.lineTo(x + 40, y + 40);
+            ctx.stroke();
+          }
+          if (Math.random() > .6) {
+            ctx.beginPath();
+            ctx.arc(x + 40, y + 40, 3, 0, Math.PI * 2);
+            ctx.fillStyle = '#a855f7';
+            ctx.fill();
+          }
+        }
+      }
+    }
+    drawCircuits();
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawCircuits();
+    });
+
+    // ── PARTICLES ──
+    const pContainer = document.getElementById('particles');
+    for (let i = 0; i < 25; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 4 + 2;
+      p.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random()*100}%;
+        animation-duration:${8 + Math.random()*12}s;
+        animation-delay:${-Math.random()*20}s;
+      `;
+      pContainer.appendChild(p);
+    }
+
+    // ── COUNTER ANIMATION ──
+    function animateCounters() {
+      document.querySelectorAll('[data-target]').forEach(el => {
+        const target = parseInt(el.dataset.target);
+        let count = 0;
+        const step = target / 60;
+        const timer = setInterval(() => {
+          count = Math.min(count + step, target);
+          el.textContent = Math.floor(count) + '%';
+          if (count >= target) clearInterval(timer);
+        }, 25);
+      });
+    }
+    setTimeout(animateCounters, 800);
+
+    // ── SCROLL REVEAL ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal, .tl-item').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
