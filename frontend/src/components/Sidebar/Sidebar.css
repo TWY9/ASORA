@@ -1,0 +1,17 @@
+.nav-item-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  padding-top: var(--space-md);
+}
+
+.nav-item-bottom .nav-link {
+  width: 100%;
+  background: none;
+  text-align: left;
+  color: var(--text-muted);
+}
+
+.nav-item-bottom .nav-link:hover {
+  color: var(--danger);
+  background: rgba(255, 77, 106, 0.08);
+}

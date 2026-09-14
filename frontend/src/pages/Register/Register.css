@@ -1,0 +1,32 @@
+.role-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--space-lg);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--space-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.role-option:hover {
+  border-color: var(--accent-primary);
+}
+
+.role-option.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-glow);
+  box-shadow: var(--shadow-glow);
+}
+
+.role-label {
+  font-weight: 600;
+  font-size: var(--font-md);
+}
+
+.role-desc {
+  font-size: var(--font-sm);
+  color: var(--text-muted);
+}

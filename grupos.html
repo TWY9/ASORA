@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Asora - Grupos de asesorías académicas. Crea y únete a grupos de estudio con calendarios de disponibilidad.">
+    <title>Asora | Grupos</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* === Groups 2D Navigation === */
+        .groups-navigation {
+            position: relative;
+        }
+
+        /* Subject indicator */
+        .subject-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: var(--space-xl);
+        }
+
+        .subject-indicator-text {
+            font-size: var(--font-sm);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subject-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .subject-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            opacity: 0.3;
+            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+
+        .subject-dot.active {
+            background: var(--accent-primary);
+            opacity: 1;
+            box-shadow: 0 0 10px rgba(0, 212, 170, 0.4);
+        }
+
+        /* Topic Navigation (horizontal) */
+        .topic-nav {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        .topic-nav-track {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            overflow-x: auto;
+            padding: var(--space-sm) 0;
+            scrollbar-width: none;
+        }
+
+        .topic-nav-track::-webkit-scrollbar {
+            display: none;
+        }
+
+        .topic-tab {
+            padding: var(--space-sm) var(--space-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            color: var(--text-secondary);
+            font-size: var(--font-sm);
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            flex-shrink: 0;
+        }
+
+        .topic-tab:hover {
+            border-color: var(--accent-primary);
+            color: var(--text-primary);
+        }
+
+        .topic-tab.active {
+            background: var(--accent-gradient);
+            color: var(--bg-primary);
+            border-color: transparent;
+            font-weight: 600;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .topic-arrow {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: var(--font-base);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            flex-shrink: 0;
+        }
+
+        .topic-arrow:hover {
+            background: var(--accent-glow);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Down arrow to switch subjects */
+        .subject-switch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: var(--space-xl);
+        }
+
+        .subject-arrow-down {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--border-radius);
+            transition: all var(--transition-base);
+            color: var(--text-muted);
+        }
+
+        .subject-arrow-down:hover {
+            color: var(--accent-primary);
+            background: var(--accent-glow);
+        }
+
+        .subject-arrow-down .arrow-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            font-size: var(--font-lg);
+            transition: all var(--transition-base);
+        }
+
+        .subject-arrow-down:hover .arrow-icon {
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-glow);
+            transform: translateY(3px);
+        }
+
+        .subject-arrow-down .arrow-label {
+            font-size: var(--font-xs);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .next-subject-preview {
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* Group content transition */
+        .group-content-area {
+            position: relative;
+            min-height: 300px;
+        }
+
+        .group-slide {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .group-slide.slide-out-left {
+            opacity: 0;
+            transform: translateX(-40px);
+        }
+
+        .group-slide.slide-out-right {
+            opacity: 0;
+            transform: translateX(40px);
+        }
+
+        .group-slide.slide-out-up {
+            opacity: 0;
+            transform: translateY(-40px);
+        }
+
+        .group-slide.slide-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Topic counter */
+        .topic-counter {
+            text-align: center;
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            margin-top: var(--space-sm);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app-layout">
+        <!-- ========== SIDEBAR ========== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="profile-section">
+                <div class="profile-avatar">U</div>
+                <div class="profile-name">Usuario</div>
+                <div class="profile-career">Ing. en Sistemas Computacionales</div>
+                <span class="profile-status">Activo</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">👤</span>
+                        Perfil
+                    </a>
+                </div>
+
+                <div class="nav-item expanded" id="nav-asesorias">
+                    <div class="nav-link active" onclick="toggleSubNav('nav-asesorias')">
+                        <span class="nav-icon">📚</span>
+                        Asesorías
+                        <span class="nav-arrow">▶</span>
+                    </div>
+                    <div class="sub-nav">
+                        <a href="index.html" class="sub-nav-link">Individual</a>
+                        <a href="grupos.html" class="sub-nav-link active">Grupal</a>
+                    </div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">🔬</span>
+                        Círculos de Estudio
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <div class="nav-link" onclick="toggleSubNav('nav-plan')">
+                        <span class="nav-icon">📋</span>
+                        Plan de Estudios
+                        <span class="nav-arrow">▶</span>
+                    </div>
+                    <div class="sub-nav" id="nav-plan"></div>
+                </div>
+
+                <div class="nav-item">
+                    <a href="#" class="nav-link">
+                        <span class="nav-icon">ℹ️</span>
+                        Acerca de...
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- ========== MAIN ========== -->
+        <div class="main-wrapper">
+            <header class="header">
+                <div class="header-left">
+                    <button class="header-btn mobile-menu-btn" onclick="toggleSidebar()"
+                        style="display:none;">☰</button>
+                    <div class="header-logo">ASORA</div>
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" class="search-input" placeholder="Buscar grupos, materias, asesores...">
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Notificaciones">🔔</button>
+                    <button class="header-btn" title="Configuración">⚙️</button>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <!-- Page Title + Actions -->
+                <div class="groups-header">
+                    <div class="page-title-section" style="margin-bottom: 0;">
+                        <h1 class="page-title">Grupos</h1>
+                        <p class="page-subtitle">Asesorías grupales con calendario de disponibilidad</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn-primary" onclick="alert('Crear nuevo grupo — Próximamente')">
+                            ✚ Crear nuevo grupo
+                        </button>
+                        <button class="btn-secondary" onclick="alert('Filtrar — Próximamente')">
+                            🔽 Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== 2D Navigation System ===== -->
+                <div class="groups-navigation">
+
+                    <!-- Subject Dots (vertical indicator) -->
+                    <div class="subject-indicator">
+                        <span class="subject-indicator-text">Materia</span>
+                        <div class="subject-dots" id="subjectDots">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Topic Navigation (horizontal tabs + arrows) -->
+                    <div class="topic-nav">
+                        <button class="topic-arrow" onclick="navigateTopic(-1)" title="Tema anterior">◀</button>
+                        <div class="topic-nav-track" id="topicTabs">
+                            <!-- Generated by JS -->
+                        </div>
+                        <button class="topic-arrow" onclick="navigateTopic(1)" title="Tema siguiente">▶</button>
+                    </div>
+
+                    <!-- Group Content -->
+                    <div class="group-content-area">
+                        <div class="group-slide" id="groupContent">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Down Arrow to switch subject -->
+                    <div class="subject-switch">
+                        <div class="subject-arrow-down" onclick="navigateSubject(1)" id="subjectArrowDown">
+                            <span class="arrow-label">Siguiente materia</span>
+                            <div class="arrow-icon">▼</div>
+                            <span class="next-subject-preview" id="nextSubjectPreview"></span>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ========== INFO MODAL ========== -->
+    <div class="modal-overlay" id="infoModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeInfoModal()">✕</button>
+            <h3 class="modal-title" id="modalTitle">Información</h3>
+            <div class="modal-info-list" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // =============================================
+        // GROUPS 2D NAVIGATION DATA & LOGIC
+        // =============================================
+
+        const subjectsData = [
+            {
+                name: 'Métodos Numéricos',
+                advisor: 'User571 (ISC)',
+                badge: 'presencial',
+                topics: [
+                    {
+                        name: 'Unidad 1 — Errores',
+                        month: 'Abril — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', 'Ocupado', '', 'Ocupado', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 1 — Errores',
+                            fecha: 'Martes y Jueves — Abril 2025',
+                            lugar: 'Biblioteca, cubículo 3',
+                            hora: '9:00 - 10:00 am'
+                        }
+                    },
+                    {
+                        name: 'Unidad 2 — Raíces',
+                        month: 'Mayo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', 'Ocupado', '', '', 'Ocupado', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', 'Ocupado', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 2 — Raíces de ecuaciones',
+                            fecha: 'Martes 5 - Mayo 2025',
+                            lugar: 'Biblioteca, cubículo 3',
+                            hora: '8:00 - 9:00 am'
+                        }
+                    },
+                    {
+                        name: 'Unidad 3 — Interpolación',
+                        month: 'Mayo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['Ocupado', '', 'Ocupado', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 3 — Interpolación',
+                            fecha: 'Lunes y Miércoles — Mayo 2025',
+                            lugar: 'Biblioteca, cubículo 3',
+                            hora: '10:00 - 11:00 am'
+                        }
+                    },
+                    {
+                        name: 'Unidad 4 — Integración',
+                        month: 'Junio — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', 'Ocupado', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['Ocupado', '', '', '', 'Ocupado', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 4 — Integración numérica',
+                            fecha: 'Sábado — Junio 2025',
+                            lugar: 'Biblioteca, cubículo 3',
+                            hora: '8:00 - 9:00 am'
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'Graficación',
+                advisor: 'User777 (Egresado)',
+                badge: 'online',
+                topics: [
+                    {
+                        name: 'Escalamiento',
+                        month: 'Mayo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', 'Ocupado', 'Ocupado'],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Escalamiento',
+                            fecha: 'Sábado y Domingo — Mayo 2025',
+                            lugar: 'Online — Google Meet',
+                            hora: '7:00 - 8:00 am'
+                        }
+                    },
+                    {
+                        name: 'Desplazamiento',
+                        month: 'Mayo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', 'Ocupado', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Desplazamiento',
+                            fecha: 'Martes — Mayo 2025',
+                            lugar: 'Online — Google Meet',
+                            hora: '10:00 - 11:00 am'
+                        }
+                    },
+                    {
+                        name: 'Rotación',
+                        month: 'Junio — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', 'Ocupado', '', 'Ocupado', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Rotación',
+                            fecha: 'Miércoles y Viernes — Junio 2025',
+                            lugar: 'Online — Google Meet',
+                            hora: '9:00 - 10:00 am'
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'Cálculo Integral',
+                advisor: 'User016 (ISC)',
+                badge: 'presencial',
+                topics: [
+                    {
+                        name: 'Unidad 1 — Antiderivadas',
+                        month: 'Marzo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['Ocupado', '', '', '', 'Ocupado', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 1 — Antiderivadas',
+                            fecha: 'Lunes y Viernes — Marzo 2025',
+                            lugar: 'Edificio C, Aula 201',
+                            hora: '8:00 - 9:00 am'
+                        }
+                    },
+                    {
+                        name: 'Unidad 2 — Integral definida',
+                        month: 'Abril — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['Ocupado', '', 'Ocupado', '', 'Ocupado', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 2 — Integral definida',
+                            fecha: 'Lunes, Miércoles, Viernes — Abril 2025',
+                            lugar: 'Edificio C, Aula 201',
+                            hora: '9:00 - 10:00 am'
+                        }
+                    },
+                    {
+                        name: 'Unidad 3 — Integrales por partes',
+                        month: 'Mayo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['Ocupado', '', 'Ocupado', '', 'Ocupado', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 3 — Integrales por partes',
+                            fecha: 'Lunes, Miércoles, Viernes — Mayo 2025',
+                            lugar: 'Edificio C, Aula 201',
+                            hora: '9:00 - 10:00 am'
+                        }
+                    }
+                ]
+            },
+            {
+                name: 'Probabilidad y Estadística',
+                advisor: 'User123 (ISC)',
+                badge: 'presencial',
+                topics: [
+                    {
+                        name: 'Unidad 1 — Estadística descriptiva',
+                        month: 'Marzo — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', 'Ocupado', '', 'Ocupado', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 1 — Estadística descriptiva',
+                            fecha: 'Martes y Jueves — Marzo 2025',
+                            lugar: 'Edificio B, Aula 105',
+                            hora: '8:00 - 9:00 am'
+                        }
+                    },
+                    {
+                        name: 'Unidad 2 — Probabilidad',
+                        month: 'Abril — 2025',
+                        schedule: [
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', 'Ocupado', '', '', '', ''],
+                            ['', '', '', '', '', 'Ocupado', ''],
+                            ['', '', '', '', '', '', ''],
+                            ['', '', '', '', '', '', '']
+                        ],
+                        modalInfo: {
+                            tema: 'Unidad 2 — Probabilidad',
+                            fecha: 'Miércoles y Sábado — Abril 2025',
+                            lugar: 'Edificio B, Aula 105',
+                            hora: '10:00 - 11:00 am / 11:00-12:00 pm'
+                        }
+                    }
+                ]
+            }
+        ];
+
+        const timeSlots = ['7 - 8', '8 - 9', '9 - 10', '10 - 11', '11 - 12', '12 - 1', '1 - 2'];
+        const days = ['Lunes', 'Martes', 'Miér.', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+        let currentSubjectIndex = 0;
+        let currentTopicIndex = 0;
+
+        function renderSubjectDots() {
+            const dotsContainer = document.getElementById('subjectDots');
+            dotsContainer.innerHTML = subjectsData.map((s, i) =>
+                `<div class="subject-dot ${i === currentSubjectIndex ? 'active' : ''}" 
+              onclick="goToSubject(${i})" title="${s.name}"></div>`
+            ).join('');
+        }
+
+        function renderTopicTabs() {
+            const tabsContainer = document.getElementById('topicTabs');
+            const subject = subjectsData[currentSubjectIndex];
+            tabsContainer.innerHTML = subject.topics.map((t, i) =>
+                `<div class="topic-tab ${i === currentTopicIndex ? 'active' : ''}" 
+              onclick="goToTopic(${i})">${t.name}</div>`
+            ).join('');
+        }
+
+        function renderGroupCard() {
+            const container = document.getElementById('groupContent');
+            const subject = subjectsData[currentSubjectIndex];
+            const topic = subject.topics[currentTopicIndex];
+
+            const badgeClass = subject.badge === 'presencial' ? 'badge-presencial' : 'badge-online';
+            const badgeIcon = subject.badge === 'presencial' ? '📍' : '🌐';
+            const badgeText = subject.badge === 'presencial' ? 'Presencial' : 'Online';
+
+            let scheduleRows = '';
+            timeSlots.forEach((time, rowIdx) => {
+                let cells = `<td class="time-col">${time}</td>`;
+                days.forEach((_, colIdx) => {
+                    const val = topic.schedule[rowIdx][colIdx];
+                    if (val === 'Ocupado') {
+                        cells += `<td class="occupied" onclick="showGroupModal(${currentSubjectIndex}, ${currentTopicIndex})">Ocupado</td>`;
+                    } else {
+                        cells += `<td></td>`;
+                    }
+                });
+                scheduleRows += `<tr>${cells}</tr>`;
+            });
+
+            container.innerHTML = `
+        <div class="group-card">
+          <div class="group-card-header">
+            <div>
+              <h2 class="group-title">${subject.name}</h2>
+              <div class="group-advisor">
+                <div class="group-advisor-avatar">👤</div>
+                <span>${subject.advisor}</span>
+              </div>
+              <div class="group-topics">Tema: ${topic.name}</div>
+            </div>
+            <span class="group-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+          </div>
+          <div class="schedule-container">
+            <div class="schedule-month">${topic.month}</div>
+            <table class="schedule-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  ${days.map(d => `<th>${d}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${scheduleRows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="topic-counter">
+          Tema ${currentTopicIndex + 1} de ${subject.topics.length} · ${subject.name}
+        </div>
+      `;
+        }
+
+        function updateNextSubjectPreview() {
+            const preview = document.getElementById('nextSubjectPreview');
+            const nextIdx = (currentSubjectIndex + 1) % subjectsData.length;
+            preview.textContent = subjectsData[nextIdx].name;
+        }
+
+        function renderAll() {
+            renderSubjectDots();
+            renderTopicTabs();
+            renderGroupCard();
+            updateNextSubjectPreview();
+        }
+
+        // Navigate topics (horizontal ◀ ▶)
+        function navigateTopic(direction) {
+            const subject = subjectsData[currentSubjectIndex];
+            const newIndex = currentTopicIndex + direction;
+            if (newIndex < 0 || newIndex >= subject.topics.length) return;
+
+            const container = document.getElementById('groupContent');
+            container.classList.add(direction > 0 ? 'slide-out-left' : 'slide-out-right');
+
+            setTimeout(() => {
+                currentTopicIndex = newIndex;
+                renderAll();
+                container.classList.remove('slide-out-left', 'slide-out-right');
+                container.classList.add('slide-in');
+                requestAnimationFrame(() => {
+                    container.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        container.classList.remove('slide-in');
+                        container.style.transition = '';
+                        container.style.opacity = '';
+                        container.style.transform = '';
+                    }, 400);
+                });
+            }, 300);
+        }
+
+        function goToTopic(index) {
+            if (index === currentTopicIndex) return;
+            const direction = index > currentTopicIndex ? 1 : -1;
+            const container = document.getElementById('groupContent');
+            container.classList.add(direction > 0 ? 'slide-out-left' : 'slide-out-right');
+
+            setTimeout(() => {
+                currentTopicIndex = index;
+                renderAll();
+                container.classList.remove('slide-out-left', 'slide-out-right');
+                container.classList.add('slide-in');
+                requestAnimationFrame(() => {
+                    container.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        container.classList.remove('slide-in');
+                        container.style.transition = '';
+                        container.style.opacity = '';
+                        container.style.transform = '';
+                    }, 400);
+                });
+            }, 300);
+        }
+
+        // Navigate subjects (vertical ▼)
+        function navigateSubject(direction) {
+            const newIndex = currentSubjectIndex + direction;
+            if (newIndex < 0 || newIndex >= subjectsData.length) {
+                // Wrap around
+                if (newIndex < 0) {
+                    currentSubjectIndex = subjectsData.length - 1;
+                } else {
+                    currentSubjectIndex = 0;
+                }
+            } else {
+                currentSubjectIndex = newIndex;
+            }
+            currentTopicIndex = 0;
+
+            const container = document.getElementById('groupContent');
+            container.classList.add('slide-out-up');
+
+            setTimeout(() => {
+                renderAll();
+                container.classList.remove('slide-out-up');
+                container.classList.add('slide-in');
+                requestAnimationFrame(() => {
+                    container.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        container.classList.remove('slide-in');
+                        container.style.transition = '';
+                        container.style.opacity = '';
+                        container.style.transform = '';
+                    }, 400);
+                });
+            }, 300);
+        }
+
+        function goToSubject(index) {
+            if (index === currentSubjectIndex) return;
+            currentSubjectIndex = index;
+            currentTopicIndex = 0;
+
+            const container = document.getElementById('groupContent');
+            container.classList.add('slide-out-up');
+
+            setTimeout(() => {
+                renderAll();
+                container.classList.remove('slide-out-up');
+                container.classList.add('slide-in');
+                requestAnimationFrame(() => {
+                    container.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                    container.style.opacity = '1';
+                    container.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        container.classList.remove('slide-in');
+                        container.style.transition = '';
+                        container.style.opacity = '';
+                        container.style.transform = '';
+                    }, 400);
+                });
+            }, 300);
+        }
+
+        // Modal for group info
+        function showGroupModal(subjectIdx, topicIdx) {
+            const subject = subjectsData[subjectIdx];
+            const topic = subject.topics[topicIdx];
+            const info = topic.modalInfo;
+
+            const modal = document.getElementById('infoModal');
+            const title = document.getElementById('modalTitle');
+            const body = document.getElementById('modalBody');
+
+            title.textContent = 'Información de Asesoría';
+
+            body.innerHTML = `
+        <div class="modal-info-item">
+          <div class="modal-info-icon">📚</div>
+          <div>
+            <div class="modal-info-label">Asesoría</div>
+            <div class="modal-info-value">${subject.name}</div>
+          </div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-icon">📝</div>
+          <div>
+            <div class="modal-info-label">Temas</div>
+            <div class="modal-info-value">${info.tema}</div>
+          </div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-icon">📅</div>
+          <div>
+            <div class="modal-info-label">Fecha</div>
+            <div class="modal-info-value">${info.fecha}</div>
+          </div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-icon">${subject.badge === 'presencial' ? '📍' : '🌐'}</div>
+          <div>
+            <div class="modal-info-label">${subject.badge === 'presencial' ? 'Lugar' : 'Modalidad'}</div>
+            <div class="modal-info-value">${info.lugar}</div>
+          </div>
+        </div>
+        <div class="modal-info-item">
+          <div class="modal-info-icon">🕐</div>
+          <div>
+            <div class="modal-info-label">Hora</div>
+            <div class="modal-info-value">${info.hora}</div>
+          </div>
+        </div>
+      `;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('infoModal').classList.contains('active')) {
+                if (e.key === 'Escape') closeInfoModal();
+                return;
+            }
+            if (e.key === 'ArrowLeft') navigateTopic(-1);
+            if (e.key === 'ArrowRight') navigateTopic(1);
+            if (e.key === 'ArrowDown') { e.preventDefault(); navigateSubject(1); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); navigateSubject(-1); }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+        });
+    </script>
+</body>
+
+</html>

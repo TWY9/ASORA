@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Asora - Plataforma de asesorías académicas. Encuentra asesorías individuales y grupales para todas tus materias.">
+  <title>Asora | Asesorías Académicas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Profile -->
+      <div class="profile-section">
+        <div class="profile-avatar">U</div>
+        <div class="profile-name">Usuario</div>
+        <div class="profile-career">Ing. en Sistemas Computacionales</div>
+        <span class="profile-status">Activo</span>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <div class="nav-item">
+          <a href="#" class="nav-link">
+            <span class="nav-icon">👤</span>
+            Perfil
+          </a>
+        </div>
+
+        <div class="nav-item expanded" id="nav-asesorias">
+          <div class="nav-link active" onclick="toggleSubNav('nav-asesorias')">
+            <span class="nav-icon">📚</span>
+            Asesorías
+            <span class="nav-arrow">▶</span>
+          </div>
+          <div class="sub-nav">
+            <a href="index.html" class="sub-nav-link active">Individual</a>
+            <a href="grupos.html" class="sub-nav-link">Grupal</a>
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <a href="#" class="nav-link">
+            <span class="nav-icon">🔬</span>
+            Círculos de Estudio
+          </a>
+        </div>
+
+        <div class="nav-item">
+          <div class="nav-link" onclick="toggleSubNav('nav-plan')">
+            <span class="nav-icon">📋</span>
+            Plan de Estudios
+            <span class="nav-arrow">▶</span>
+          </div>
+          <div class="sub-nav" id="nav-plan">
+          </div>
+        </div>
+
+        <div class="nav-item">
+          <a href="#" class="nav-link">
+            <span class="nav-icon">ℹ️</span>
+            Acerca de...
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <div class="main-wrapper">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="header-btn mobile-menu-btn" onclick="toggleSidebar()" style="display:none;">☰</button>
+          <div class="header-logo">ASORA</div>
+          <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" placeholder="Buscar asesorías, materias, asesores...">
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" title="Notificaciones">🔔</button>
+          <button class="header-btn" title="Configuración">⚙️</button>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <main class="main-content">
+        <!-- Page Title -->
+        <div class="page-title-section">
+          <h1 class="page-title">Asesorías Individuales</h1>
+          <p class="page-subtitle">Encuentra la asesoría que necesitas con los mejores asesores</p>
+        </div>
+
+        <!-- Section: Advisory Cards Grid -->
+        <h2 class="section-title">Materias Disponibles</h2>
+
+        <div class="cards-grid">
+          <!-- Card 1 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User123</div>
+            <div class="card-subject">Química</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User445</div>
+            <div class="card-subject">Métodos Numéricos</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User777</div>
+            <div class="card-subject">Física</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User016</div>
+            <div class="card-subject">Cálculo Integral</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User578</div>
+            <div class="card-subject">Redes</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User356</div>
+            <div class="card-subject">Software</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 7 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User123</div>
+            <div class="card-subject">Probabilidad y Estadística</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+
+          <!-- Card 8 -->
+          <div class="advisory-card animate-fade-in-up" onclick="window.location.href='#'">
+            <div class="card-avatar">👤</div>
+            <div class="card-username">User971</div>
+            <div class="card-subject">Principios Eléctricos</div>
+            <a href="#" class="card-link">Ver más →</a>
+          </div>
+        </div>
+
+        <!-- Featured Section: Asesorías Grupales -->
+        <div class="featured-section">
+          <div class="featured-banner">
+            <h2 class="featured-title">Cálculo Vectorial</h2>
+            <p class="featured-subtitle">Asesorías grupales</p>
+            <div class="carousel-dots">
+              <span class="carousel-dot active"></span>
+              <span class="carousel-dot"></span>
+              <span class="carousel-dot"></span>
+              <span class="carousel-dot"></span>
+              <span class="carousel-dot"></span>
+            </div>
+          </div>
+
+          <!-- Carousel -->
+          <div class="carousel-container">
+            <div class="carousel-track" id="carouselTrack">
+              <!-- Carousel Card 1 -->
+              <div class="carousel-card animate-fade-in-up">
+                <div class="card-avatar">👤</div>
+                <div class="card-username">User111</div>
+                <div class="card-subject">Graficación</div>
+                <a href="#" class="card-link">Ver más →</a>
+              </div>
+
+              <!-- Carousel Card 2 -->
+              <div class="carousel-card animate-fade-in-up">
+                <div class="card-avatar">👤</div>
+                <div class="card-username">User987</div>
+                <div class="card-subject">Álgebra Lineal</div>
+                <a href="#" class="card-link">Ver más →</a>
+              </div>
+
+              <!-- Carousel Card 3 -->
+              <div class="carousel-card animate-fade-in-up">
+                <div class="card-avatar">👤</div>
+                <div class="card-username">User130</div>
+                <div class="card-subject">Contabilidad</div>
+                <a href="#" class="card-link">Ver más →</a>
+              </div>
+
+              <!-- Carousel Card 4 -->
+              <div class="carousel-card animate-fade-in-up">
+                <div class="card-avatar">👤</div>
+                <div class="card-username">User286</div>
+                <div class="card-subject">Web</div>
+                <a href="#" class="card-link">Ver más →</a>
+              </div>
+
+              <!-- Extra cards for carousel scrolling -->
+              <div class="carousel-card animate-fade-in-up">
+                <div class="card-avatar">👤</div>
+                <div class="card-username">User402</div>
+                <div class="card-subject">Bases de Datos</div>
+                <a href="#" class="card-link">Ver más →</a>
+              </div>
+
+              <div class="carousel-card animate-fade-in-up">
+                <div class="card-avatar">👤</div>
+                <div class="card-username">User519</div>
+                <div class="card-subject">Inteligencia Artificial</div>
+                <a href="#" class="card-link">Ver más →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
